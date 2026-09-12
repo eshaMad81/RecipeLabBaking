@@ -1,20 +1,9 @@
-# AI Recipe Lab — run locally
+Data and code accompanying the paper
 
-## Setup
-1. Install [Node.js](https://nodejs.org) if you don't have it.
-2. In this folder, run:
-   ```
-   npm install
-   ```
-3. Create a file named `.env` in this same folder with your Anthropic API key:
-   ```
-   ANTHROPIC_API_KEY=sk-ant-your-key-here
-   ```
-   Get a key at https://console.anthropic.com/settings/keys
-4. Start the server:
-   ```
-   npm start
-   ```
-5. Open http://localhost:3000 in your browser.
+Darveniza, T., Wong, R., Zhu, S., Pujic, Z., Sun, B., Levendosky, M., Agarwal, R., McCullough, M. H., & Goodhill, G. (2026). Larval zebrafish minimize energy consumption during hunting via adaptive movement selection. Proceedings of the National Academy of Sciences of the United States of America.
 
-Your API key stays on your machine in the server — it's never sent to the browser.
+Detailed README files are present in each folder after decompressing the `7z` file.
+Briefly,
+- `ZFLOW` folder contains C++ code for running Computational fluid dynamics (CFD) simulation of larval zebrafish, and MATLAB code for preprocessing and postprocessing.
+- `RL` folder contains Python code for running Reinforcement Learning algorithm using zebrafish experimental data, and relevant plotting code for analyzing trained agents
+- `analysis` folder contains MATLAB code for behavior analyses.
