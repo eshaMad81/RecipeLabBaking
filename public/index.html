@@ -1,0 +1,2291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Recipe Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cocoa-900:#2B1B14;
+    --cocoa-800:#3A2A1E;
+    --cocoa-700:#4A3226;
+    --parchment:#F4EAD4;
+    --parchment-dim:#E8DCC0;
+    --jam:#9A2B3C;
+    --jam-light:#B8465A;
+    --butter:#E8B94A;
+    --ink:#3A2A1E;
+    --line: rgba(58,42,30,0.16);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--cocoa-900);
+    color:var(--parchment);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-wrap:break-word;
+  }
+  .wrap{
+    max-width:880px;
+    margin:0 auto;
+    padding:36px 20px 80px;
+  }
+  header{
+    margin-bottom:28px;
+  }
+  .kicker{
+    font-size:13px;
+    color:var(--butter);
+    letter-spacing:0.02em;
+    margin:0 0 6px;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:38px;
+    line-height:1.08;
+    margin:0 0 10px;
+    color:var(--parchment);
+  }
+  .sub{
+    font-size:15px;
+    color:var(--parchment-dim);
+    max-width:52ch;
+    line-height:1.5;
+    margin:0;
+  }
+
+  nav.tabs{
+    display:flex;
+    gap:4px;
+    margin:32px 0 24px;
+    border-bottom:1px solid rgba(244,234,212,0.15);
+    overflow-x:auto;
+  }
+  nav.tabs button{
+    background:none;
+    border:none;
+    color:var(--parchment-dim);
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    font-weight:500;
+    padding:10px 16px;
+    cursor:pointer;
+    white-space:nowrap;
+    border-bottom:2px solid transparent;
+    border-radius:4px 4px 0 0;
+    transition:color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  }
+  nav.tabs button.active{
+    color:var(--butter);
+    border-bottom-color:var(--butter);
+    background:rgba(232,185,74,0.08);
+  }
+  nav.tabs button:hover:not(.active){
+    color:var(--parchment);
+    background:rgba(244,234,212,0.05);
+  }
+  nav.tabs button:focus-visible{
+    outline:2px solid var(--butter);
+    outline-offset:2px;
+  }
+
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .card{
+    background:var(--parchment);
+    color:var(--ink);
+    border-radius:6px;
+    padding:30px;
+    position:relative;
+    box-shadow:0 12px 32px rgba(0,0,0,0.28);
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:0; left:28px;
+    width:1px; height:100%;
+    background: rgba(154,43,60,0.18);
+  }
+
+  .dropzone{
+    border:1.5px dashed rgba(58,42,30,0.3);
+    border-radius:4px;
+    padding:36px 20px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color 0.15s ease, background 0.15s ease;
+  }
+  .dropzone:hover, .dropzone.drag{
+    border-color:var(--jam);
+    background:rgba(154,43,60,0.04);
+  }
+  .dropzone p{
+    margin:0;
+    font-size:14px;
+    color:var(--cocoa-700);
+  }
+  .dropzone .hint{
+    font-size:12.5px;
+    color:rgba(58,42,30,0.55);
+    margin-top:4px;
+  }
+  .preview{
+    max-width:100%;
+    max-height:260px;
+    border-radius:3px;
+    margin-bottom:16px;
+    display:block;
+  }
+
+  button.primary{
+    background:var(--jam);
+    color:var(--parchment);
+    border:none;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14.5px;
+    padding:12px 22px;
+    border-radius:3px;
+    cursor:pointer;
+    transition:background 0.15s ease;
+  }
+  button.primary:hover:not(:disabled){background:var(--jam-light);}
+  button.primary:disabled{opacity:0.5; cursor:not-allowed;}
+  button.primary:focus-visible{outline:2px solid var(--cocoa-900); outline-offset:2px;}
+
+  button.ghost{
+    background:none;
+    border:1px solid rgba(58,42,30,0.25);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-weight:500;
+    font-size:13.5px;
+    padding:9px 14px;
+    border-radius:3px;
+    cursor:pointer;
+  }
+  button.ghost:hover{border-color:var(--jam); color:var(--jam);}
+
+  .chip-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:14px 0;
+  }
+  .chip{
+    background:rgba(58,42,30,0.06);
+    border:1px solid rgba(58,42,30,0.15);
+    color:var(--ink);
+    font-size:13px;
+    font-weight:500;
+    padding:7px 13px;
+    border-radius:16px;
+    cursor:pointer;
+    transition:background 0.15s ease, border-color 0.15s ease;
+  }
+  .chip:hover{background:rgba(154,43,60,0.09); border-color:var(--jam);}
+  .chip.active{
+    background:var(--jam);
+    border-color:var(--jam);
+    color:var(--parchment);
+  }
+  .chip.active:hover{background:var(--jam-light);}
+
+  textarea, input[type="text"]{
+    width:100%;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    padding:11px 13px;
+    border-radius:3px;
+    border:1px solid rgba(58,42,30,0.25);
+    background:#fff;
+    color:var(--ink);
+    resize:vertical;
+  }
+  textarea:focus, input:focus{outline:2px solid var(--jam); outline-offset:1px;}
+
+  .loading{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:14px;
+    color:var(--cocoa-700);
+    padding:20px 0;
+  }
+  .spinner{
+    width:16px;height:16px;
+    border:2px solid rgba(154,43,60,0.25);
+    border-top-color:var(--jam);
+    border-radius:50%;
+    animation:spin 0.7s linear infinite;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .error{
+    background:rgba(154,43,60,0.08);
+    border:1px solid rgba(154,43,60,0.3);
+    color:var(--jam);
+    font-size:13.5px;
+    padding:12px 14px;
+    border-radius:3px;
+    margin-top:14px;
+  }
+
+  /* Recipe card */
+  .recipe{
+    margin-top:24px;
+    padding-top:22px;
+    border-top:1px solid var(--line);
+  }
+  .recipe-title{
+    font-family:'Fraunces',serif;
+    font-size:26px;
+    font-weight:600;
+    margin:0 0 6px;
+    color:var(--jam);
+  }
+  .recipe-desc{
+    font-size:14px;
+    color:var(--cocoa-700);
+    line-height:1.55;
+    margin:0 0 16px;
+  }
+  .confidence{
+    display:inline-block;
+    font-size:12px;
+    font-weight:500;
+    color:var(--cocoa-700);
+    background:rgba(232,185,74,0.25);
+    padding:5px 10px;
+    border-radius:3px;
+    margin-bottom:18px;
+  }
+
+  .nutrition-strip{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    background:rgba(58,42,30,0.05);
+    border:1px solid rgba(58,42,30,0.14);
+    border-radius:5px;
+    padding:12px 14px;
+    margin-bottom:18px;
+  }
+  .nutrition-strip .nutrition-label{
+    width:100%;
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--cocoa-700);
+    margin-bottom:2px;
+  }
+  .nutrition-item{
+    display:flex;
+    flex-direction:column;
+    min-width:56px;
+  }
+  .nutrition-item .val{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:16px;
+    color:var(--jam);
+    line-height:1.1;
+  }
+  .nutrition-item .unit{
+    font-size:11px;
+    color:var(--cocoa-700);
+  }
+
+  .time-strip{
+    display:flex;
+    align-items:baseline;
+    gap:6px;
+    font-size:13px;
+    color:var(--cocoa-700);
+    margin-bottom:14px;
+  }
+  .time-strip .time-total{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:15.5px;
+    color:var(--jam);
+  }
+
+  .time-select-row{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:14px 0 4px;
+  }
+  .time-select-row label{
+    margin-bottom:0;
+    white-space:nowrap;
+  }
+  .time-select-row select{
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    padding:8px 10px;
+    border-radius:3px;
+    border:1px solid rgba(58,42,30,0.25);
+    background:#fff;
+    color:var(--ink);
+  }
+  .time-select-row select:focus{outline:2px solid var(--jam); outline-offset:1px;}
+
+  .validate-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:22px;
+    margin-top:20px;
+  }
+  @media (min-width:640px){
+    .validate-grid{grid-template-columns:1fr 1fr;}
+  }
+  .validate-col-title{
+    font-family:'Fraunces',serif;
+    font-size:15.5px;
+    font-weight:600;
+    margin-bottom:10px;
+  }
+  .validate-col-title.required{color:var(--jam);}
+  .validate-col-title.flexible{color:var(--cocoa-700);}
+  .validate-card{
+    display:flex;
+    gap:10px;
+    padding:12px 14px;
+    border-radius:5px;
+    margin-bottom:10px;
+  }
+  .validate-card.required{
+    background:rgba(154,43,60,0.055);
+    border:1px solid rgba(154,43,60,0.22);
+  }
+  .validate-card.flexible{
+    background:rgba(232,185,74,0.16);
+    border:1px solid rgba(232,185,74,0.4);
+  }
+  .validate-icon{
+    font-weight:700;
+    flex-shrink:0;
+    color:var(--jam);
+  }
+  .validate-card.flexible .validate-icon{color:var(--cocoa-700);}
+  .validate-item-name{
+    font-weight:600;
+    font-size:13.5px;
+    color:var(--ink);
+    margin-bottom:2px;
+  }
+  .validate-item-reason{
+    font-size:12.5px;
+    color:var(--cocoa-700);
+    line-height:1.45;
+  }
+
+  .grounding-badge{
+    margin-bottom:18px;
+  }
+  .grounding-summary{
+    cursor:pointer;
+    list-style:none;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--cocoa-700);
+    background:rgba(58,42,30,0.06);
+    border:1px solid rgba(58,42,30,0.2);
+    padding:6px 13px;
+    border-radius:14px;
+    transition:border-color 0.15s ease, color 0.15s ease;
+  }
+  .grounding-summary::-webkit-details-marker{display:none;}
+  .grounding-summary:hover{border-color:var(--jam); color:var(--jam);}
+  .grounding-list{
+    margin-top:10px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    padding-left:2px;
+  }
+  .grounding-item{
+    display:flex;
+    gap:8px;
+    font-size:12.5px;
+    line-height:1.5;
+    color:var(--cocoa-700);
+  }
+  .grounding-item .g-icon{
+    font-weight:700;
+    flex-shrink:0;
+  }
+  .grounding-item.satisfied .g-icon{color:var(--jam);}
+  .grounding-item.unsatisfied .g-icon{color:var(--cocoa-700);}
+  .grounding-item b{color:var(--ink);}
+
+  .servings-row{
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-bottom:18px;
+    font-size:13.5px;
+    color:var(--cocoa-700);
+  }
+  .servings-row .servUp,
+  .servings-row .servDown{
+    width:26px;height:26px;
+    border-radius:50%;
+    border:1px solid rgba(58,42,30,0.3);
+    background:#fff;
+    color:var(--ink);
+    cursor:pointer;
+    font-size:15px;
+    line-height:1;
+    padding:0;
+    flex-shrink:0;
+  }
+  .servings-row .servUp:hover,
+  .servings-row .servDown:hover{border-color:var(--jam); color:var(--jam);}
+  .servings-count{font-weight:600; min-width:60px; text-align:center;}
+  .startCookBtn{
+    margin-left:auto;
+    white-space:nowrap;
+  }
+  @media (max-width:480px){
+    .startCookBtn{
+      margin-left:0;
+      flex-basis:100%;
+    }
+  }
+
+  .recipe-section-label{
+    font-size:12px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--cocoa-700);
+    margin:20px 0 8px;
+  }
+  ul.ingredients{
+    list-style:none;
+    margin:0;
+    padding:0;
+  }
+  ul.ingredients li{
+    padding:7px 0;
+    border-bottom:1px dotted rgba(58,42,30,0.15);
+  }
+  .ing-row{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    font-size:14.5px;
+  }
+  .ing-row .amt{
+    font-weight:600;
+    color:var(--jam);
+    min-width:70px;
+  }
+  .ing-row .ing-name{flex:1;}
+  .dont-have-btn{
+    background:none;
+    border:none;
+    color:var(--cocoa-700);
+    font-size:11.5px;
+    text-decoration:underline;
+    cursor:pointer;
+    padding:0;
+    white-space:nowrap;
+    flex-shrink:0;
+  }
+  .dont-have-btn:hover{color:var(--jam);}
+  .ing-buy-panel{
+    margin-top:8px;
+    padding:10px 12px;
+    background:rgba(58,42,30,0.05);
+    border:1px solid rgba(58,42,30,0.14);
+    border-radius:5px;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:12px;
+  }
+  .add-to-list-btn{
+    background:var(--jam);
+    color:var(--parchment);
+    border:none;
+    font-family:'Inter',sans-serif;
+    font-size:12px;
+    font-weight:600;
+    padding:6px 12px;
+    border-radius:12px;
+    cursor:pointer;
+  }
+  .add-to-list-btn:hover:not(:disabled){background:var(--jam-light);}
+  .add-to-list-btn.added{
+    background:rgba(58,42,30,0.15);
+    color:var(--ink);
+    cursor:default;
+  }
+  .buy-links{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:12px;
+  }
+  .buy-links-label{color:var(--cocoa-700);}
+  .buy-links a{
+    color:var(--jam);
+    text-decoration:underline;
+    font-weight:600;
+  }
+  .buy-links a:hover{color:var(--jam-light);}
+  ol.steps{
+    margin:0;
+    padding-left:20px;
+  }
+  ol.steps li{
+    font-size:14.5px;
+    line-height:1.6;
+    padding:6px 0;
+  }
+
+  .changed{
+    background:rgba(232,185,74,0.3);
+    border-radius:2px;
+    padding:1px 4px;
+  }
+  .changes-box{
+    margin-top:20px;
+    background:rgba(58,42,30,0.05);
+    border-radius:4px;
+    padding:14px 16px;
+  }
+  .changes-box h4{
+    font-family:'Fraunces',serif;
+    font-size:15px;
+    margin:0 0 10px;
+    color:var(--jam);
+  }
+  .change-item{
+    font-size:13.5px;
+    line-height:1.5;
+    margin-bottom:8px;
+    color:var(--cocoa-700);
+  }
+  .change-item b{color:var(--ink);}
+
+  .mod-section{
+    margin-top:26px;
+    padding-top:22px;
+    border-top:1px solid var(--line);
+  }
+
+  .coming-soon{
+    background:var(--cocoa-800);
+    border:1px dashed rgba(244,234,212,0.25);
+    border-radius:4px;
+    padding:22px 24px;
+    margin-bottom:14px;
+  }
+  .coming-soon h3{
+    font-family:'Fraunces',serif;
+    font-size:18px;
+    margin:0 0 6px;
+    color:var(--butter);
+  }
+  .coming-soon p{
+    font-size:13.5px;
+    color:var(--parchment-dim);
+    line-height:1.5;
+    margin:0;
+  }
+  .status-tag{
+    display:inline-block;
+    font-size:11px;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    color:var(--cocoa-900);
+    background:var(--butter);
+    padding:3px 8px;
+    border-radius:2px;
+    margin-bottom:10px;
+  }
+
+  label.field-label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--cocoa-700);
+    margin-bottom:6px;
+  }
+
+  /* Result grid: recipe + suggestions sidebar */
+  .result-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:24px;
+    margin-top:24px;
+    padding-top:22px;
+    border-top:1px solid var(--line);
+  }
+  @media (min-width:720px){
+    .result-grid{grid-template-columns: 1fr 250px;}
+  }
+  .result-grid .recipe{
+    margin-top:0;
+    padding-top:0;
+    border-top:none;
+  }
+  .result-grid .mod-section{
+    margin-top:22px;
+    padding-top:22px;
+    border-top:1px solid var(--line);
+  }
+  .suggestions-panel{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+  .suggestions-title{
+    font-family:'Fraunces',serif;
+    font-size:14.5px;
+    font-weight:600;
+    color:var(--jam);
+    margin-bottom:2px;
+  }
+  .suggestion-card{
+    display:flex;
+    gap:10px;
+    background:rgba(58,42,30,0.05);
+    border:1px solid rgba(58,42,30,0.14);
+    border-radius:6px;
+    padding:12px;
+    transition:opacity 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  }
+  .suggestion-card.skipped{opacity:0.42;}
+  .suggestion-card.added{border-color:var(--jam); background:rgba(154,43,60,0.07);}
+  .suggestion-icon{
+    width:38px;height:38px;
+    min-width:38px;
+    border-radius:50%;
+    background:rgba(232,185,74,0.4);
+    display:flex;align-items:center;justify-content:center;
+    font-size:19px;
+    line-height:1;
+  }
+  .suggestion-name{
+    font-weight:600;
+    font-size:13.5px;
+    color:var(--ink);
+    margin-bottom:2px;
+  }
+  .suggestion-reason{
+    font-size:12px;
+    color:var(--cocoa-700);
+    line-height:1.42;
+    margin-bottom:9px;
+  }
+  .suggestion-actions{display:flex; gap:6px;}
+  .suggestion-actions button{
+    font-family:'Inter',sans-serif;
+    font-size:11.5px;
+    font-weight:600;
+    padding:5px 11px;
+    border-radius:12px;
+    cursor:pointer;
+    border:1px solid rgba(58,42,30,0.25);
+    background:#fff;
+    color:var(--ink);
+  }
+  .suggestion-actions .sugg-yes{background:var(--jam); color:var(--parchment); border-color:var(--jam);}
+  .suggestion-actions .sugg-yes:hover:not(:disabled){background:var(--jam-light);}
+  .suggestion-actions .sugg-no:hover:not(:disabled){border-color:var(--jam); color:var(--jam);}
+  .suggestion-actions button:disabled{opacity:0.5; cursor:default;}
+  .suggestion-added-tag{
+    font-size:11px;
+    font-weight:600;
+    color:var(--jam);
+  }
+
+  .flag-card{
+    border-color:rgba(154,43,60,0.3);
+    background:rgba(154,43,60,0.055);
+  }
+  .flag-card .suggestion-icon{
+    background:rgba(154,43,60,0.18);
+  }
+  .flag-remove-btn{
+    background:none !important;
+    border:1px solid var(--jam) !important;
+    color:var(--jam) !important;
+  }
+  .flag-remove-btn:hover:not(:disabled){
+    background:var(--jam) !important;
+    color:var(--parchment) !important;
+  }
+  .flag-removed-tag{
+    font-size:11px;
+    font-weight:600;
+    color:var(--jam);
+  }
+
+  @media (max-width:480px){
+    h1{font-size:30px;}
+    .card{padding:20px;}
+  }
+
+  /* ---------- Cook Mode ---------- */
+  .cook-overlay{
+    position:fixed;
+    inset:0;
+    background:var(--cocoa-900);
+    z-index:1000;
+    display:flex;
+    flex-direction:column;
+    color:var(--parchment);
+  }
+  .cook-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 24px;
+    border-bottom:1px solid rgba(244,234,212,0.15);
+    flex-shrink:0;
+  }
+  .cook-close{
+    background:none;
+    border:1px solid rgba(244,234,212,0.3);
+    color:var(--parchment);
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    padding:8px 14px;
+    border-radius:3px;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .cook-close:hover{border-color:var(--butter); color:var(--butter);}
+  .cook-title{
+    font-family:'Fraunces',serif;
+    font-size:17px;
+    font-weight:600;
+    color:var(--butter);
+    text-align:center;
+    flex:1;
+    padding:0 16px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .cook-progress{
+    font-size:13px;
+    color:var(--parchment-dim);
+    white-space:nowrap;
+  }
+  .cook-body{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:32px 24px;
+    text-align:center;
+    gap:30px;
+    overflow-y:auto;
+  }
+  .cook-step-text{
+    font-family:'Fraunces',serif;
+    font-size:clamp(22px, 4vw, 38px);
+    line-height:1.4;
+    max-width:720px;
+  }
+  .cook-timer{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:14px;
+  }
+  .cook-timer-display{
+    font-family:'Fraunces',serif;
+    font-size:52px;
+    font-weight:600;
+    color:var(--butter);
+    font-variant-numeric:tabular-nums;
+  }
+  .cook-timer-display.done{color:var(--jam);}
+  .cook-timer-controls{display:flex; gap:10px;}
+  .cook-timer-controls button{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:14px;
+    padding:11px 22px;
+    border-radius:3px;
+    cursor:pointer;
+  }
+  .cook-timer-controls .primary{
+    background:var(--jam);
+    border:none;
+    color:var(--parchment);
+  }
+  .cook-timer-controls .primary:hover:not(:disabled){background:var(--jam-light);}
+  .cook-timer-controls .primary:disabled{opacity:0.5; cursor:default;}
+  .cook-timer-controls .ghost{
+    background:none;
+    border:1px solid rgba(244,234,212,0.3);
+    color:var(--parchment);
+  }
+  .cook-timer-controls .ghost:hover{border-color:var(--butter); color:var(--butter);}
+  .cook-footer{
+    display:flex;
+    justify-content:space-between;
+    padding:20px 24px;
+    border-top:1px solid rgba(244,234,212,0.15);
+    flex-shrink:0;
+  }
+  .cook-footer button{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:15px;
+    padding:13px 26px;
+    border-radius:3px;
+    cursor:pointer;
+  }
+  .cook-footer .cook-prev{
+    background:none;
+    border:1px solid rgba(244,234,212,0.3);
+    color:var(--parchment);
+  }
+  .cook-footer .cook-prev:hover:not(:disabled){border-color:var(--butter); color:var(--butter);}
+  .cook-footer .cook-prev:disabled{opacity:0.3; cursor:default;}
+  .cook-footer .cook-next{
+    background:var(--jam);
+    border:none;
+    color:var(--parchment);
+  }
+  .cook-footer .cook-next:hover{background:var(--jam-light);}
+
+  /* ---------- Session History ---------- */
+  .history-toggle{
+    position:fixed;
+    top:18px;
+    right:18px;
+    z-index:500;
+    background:var(--cocoa-800);
+    color:var(--parchment);
+    border:1px solid rgba(244,234,212,0.25);
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    padding:9px 16px;
+    border-radius:20px;
+    cursor:pointer;
+  }
+  .history-toggle:hover{border-color:var(--butter); color:var(--butter);}
+
+  @media (max-width:600px){
+    .history-toggle{
+      font-size:11.5px;
+      padding:7px 11px;
+    }
+  }
+
+  .history-panel{
+    position:fixed;
+    top:0; right:0;
+    width:360px;
+    max-width:92vw;
+    height:100vh;
+    background:var(--parchment);
+    color:var(--ink);
+    z-index:600;
+    box-shadow:-8px 0 28px rgba(0,0,0,0.35);
+    display:flex;
+    flex-direction:column;
+  }
+  .history-panel-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:18px 20px;
+    border-bottom:1px solid var(--line);
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:16px;
+    color:var(--jam);
+    flex-shrink:0;
+  }
+  .history-panel-close{
+    background:none;
+    border:none;
+    font-size:17px;
+    cursor:pointer;
+    color:var(--ink);
+    line-height:1;
+  }
+  .history-list{
+    flex:1;
+    overflow-y:auto;
+    padding:14px;
+  }
+  .history-empty{
+    padding:24px 10px;
+    font-size:13px;
+    color:var(--cocoa-700);
+    text-align:center;
+    line-height:1.5;
+  }
+  .history-entry{
+    display:block;
+    width:100%;
+    text-align:left;
+    background:rgba(58,42,30,0.04);
+    border:1px solid rgba(58,42,30,0.14);
+    border-radius:5px;
+    padding:12px 14px;
+    margin-bottom:8px;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+  }
+  .history-entry:hover{border-color:var(--jam);}
+  .history-entry .h-title{
+    font-weight:600;
+    font-size:13.5px;
+    color:var(--ink);
+    margin-bottom:3px;
+  }
+  .history-entry .h-meta{
+    font-size:11.5px;
+    color:var(--cocoa-700);
+  }
+  .history-detail{
+    flex:1;
+    overflow-y:auto;
+    padding:16px 18px;
+  }
+  .history-back{
+    background:none;
+    border:none;
+    color:var(--jam);
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    padding:0 0 14px;
+  }
+
+  .shopping-item{
+    position:relative;
+    background:rgba(58,42,30,0.04);
+    border:1px solid rgba(58,42,30,0.14);
+    border-radius:5px;
+    padding:12px 36px 12px 14px;
+    margin-bottom:8px;
+  }
+  .shopping-item.bought{opacity:0.5;}
+  .shopping-check{
+    display:flex;
+    align-items:flex-start;
+    gap:9px;
+    cursor:pointer;
+  }
+  .shopping-checkbox{margin-top:3px;}
+  .shopping-item-text{
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .shopping-item.bought .shopping-item-text{text-decoration:line-through;}
+  .shopping-item-meta{
+    font-size:11.5px;
+    color:var(--cocoa-700);
+    margin-left:25px;
+    margin-top:2px;
+  }
+  .shopping-remove{
+    position:absolute;
+    top:10px;
+    right:10px;
+    background:none;
+    border:none;
+    color:var(--cocoa-700);
+    cursor:pointer;
+    font-size:14px;
+    line-height:1;
+  }
+  .shopping-remove:hover{color:var(--jam);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="kicker">AI Recipe Lab</p>
+    <h1 id="pageTitle">Photograph a bake.<br>Get the recipe back.</h1>
+    <p class="sub" id="pageSub">Point it at a finished bake and it reverse-engineers the recipe — then adjust it for whatever you actually need.</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="reverse">Reverse Bake</button>
+    <button class="tab-btn" data-tab="combine">Combine</button>
+    <button class="tab-btn" data-tab="build">Build</button>
+    <button class="tab-btn" data-tab="validate">Validate</button>
+  </nav>
+
+  <!-- REVERSE BAKE + MODIFY -->
+  <div class="panel active" id="panel-reverse">
+    <div class="card">
+      <div id="dropzone" class="dropzone">
+        <p><strong>Drop a photo</strong> or click to upload</p>
+        <p class="hint">A cookie, cake, loaf of bread — anything baked</p>
+        <input type="file" id="fileInput" accept="image/*" style="display:none">
+      </div>
+      <img id="previewImg" class="preview" style="display:none">
+
+      <div id="reverseControls" style="margin-top:16px; display:none;">
+        <button class="primary" id="analyzeBtn">Reverse-engineer this recipe</button>
+        <button class="ghost" id="clearBtn" style="margin-left:8px;">Choose different photo</button>
+      </div>
+
+      <div id="reverseLoading" class="loading" style="display:none;">
+        <div class="spinner"></div>
+        <span>Reading the crumb, color, and shape…</span>
+      </div>
+      <div id="reverseError" class="error" style="display:none;"></div>
+
+      <div id="recipeOutput"></div>
+    </div>
+  </div>
+
+  <!-- COMBINE -->
+  <div class="panel" id="panel-combine">
+    <div class="card">
+      <label class="field-label">What's in your kitchen?</label>
+      <textarea id="combineIngredients" rows="2" placeholder="e.g. flour, ripe bananas, honey, no eggs"></textarea>
+
+      <label class="field-label" style="margin-top:14px;">What are you in the mood for?</label>
+      <div class="chip-row" id="combineGoalChips">
+        <span class="chip" data-goal="Something sweet">Something sweet</span>
+        <span class="chip" data-goal="Something savory">Something savory</span>
+        <span class="chip" data-goal="Quick, under 30 minutes">Quick &amp; easy</span>
+        <span class="chip" data-goal="A healthier option">Healthier</span>
+        <span class="chip" data-goal="Something to impress guests">Impressive</span>
+      </div>
+      <input type="text" id="combineGoal" placeholder="Or describe what you want">
+
+      <div style="margin-top:16px;">
+        <button class="primary" id="combineBtn">Build a recipe from this</button>
+      </div>
+
+      <div id="combineLoading" class="loading" style="display:none;">
+        <div class="spinner"></div>
+        <span>Working out what actually goes together…</span>
+      </div>
+      <div id="combineError" class="error" style="display:none;"></div>
+
+      <div id="combineOutput"></div>
+    </div>
+  </div>
+
+  <!-- BUILD -->
+  <div class="panel" id="panel-build">
+    <div class="card">
+      <label class="field-label">Dietary needs</label>
+      <div class="chip-row" id="buildDietaryChips">
+        <span class="chip" data-value="Vegan">Vegan</span>
+        <span class="chip" data-value="Vegetarian">Vegetarian</span>
+        <span class="chip" data-value="Gluten-free">Gluten-free</span>
+        <span class="chip" data-value="Dairy-free">Dairy-free</span>
+        <span class="chip" data-value="Nut-free">Nut-free</span>
+        <span class="chip" data-value="Egg-free">Egg-free</span>
+        <span class="chip" data-value="High-protein">High-protein</span>
+        <span class="chip" data-value="Low-sugar">Low-sugar</span>
+      </div>
+
+      <label class="field-label" style="margin-top:18px;">Flavor profile</label>
+      <div class="chip-row" id="buildFlavorChips">
+        <span class="chip" data-value="Sweet">Sweet</span>
+        <span class="chip" data-value="Rich &amp; indulgent">Rich &amp; indulgent</span>
+        <span class="chip" data-value="Light &amp; refreshing">Light &amp; refreshing</span>
+        <span class="chip" data-value="Spiced">Spiced</span>
+        <span class="chip" data-value="Tangy">Tangy</span>
+        <span class="chip" data-value="Savory">Savory</span>
+      </div>
+
+      <label class="field-label" style="margin-top:18px;">What are you making? (optional)</label>
+      <input type="text" id="buildDishType" placeholder="e.g. cookies, a loaf cake, muffins — leave blank and let it choose">
+
+      <div style="margin-top:18px;">
+        <button class="primary" id="buildBtn">Build this recipe</button>
+        <button class="ghost" id="buildWildBtn" style="margin-left:8px;">🎲 Something totally different</button>
+      </div>
+
+      <div id="buildLoading" class="loading" style="display:none;">
+        <div class="spinner"></div>
+        <span>Designing a recipe around your constraints…</span>
+      </div>
+      <div id="buildError" class="error" style="display:none;"></div>
+
+      <div id="buildOutput"></div>
+    </div>
+  </div>
+
+  <!-- VALIDATE -->
+  <div class="panel" id="panel-validate">
+    <div class="card">
+      <label class="field-label">What dish do you want to check?</label>
+      <input type="text" id="validateDish" placeholder="e.g. chocolate chip cookies, banana bread, croissants">
+
+      <div style="margin-top:16px;">
+        <button class="primary" id="validateBtn">Check what's essential</button>
+      </div>
+
+      <div id="validateLoading" class="loading" style="display:none;">
+        <div class="spinner"></div>
+        <span>Weighing this against how it's usually made…</span>
+      </div>
+      <div id="validateError" class="error" style="display:none;"></div>
+
+      <div id="validateOutput"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Session History & Shopping List -->
+<button id="historyToggleBtn" class="history-toggle" style="top:18px;">📜 History <span id="historyCount">(0)</span></button>
+<button id="shoppingToggleBtn" class="history-toggle" style="top:64px;">🛒 Shopping List <span id="shoppingCount">(0)</span></button>
+<div id="sidePanel" class="history-panel" style="display:none;">
+  <div class="history-panel-header">
+    <span id="sidePanelTitle">Session History</span>
+    <button id="sidePanelCloseBtn" class="history-panel-close">✕</button>
+  </div>
+  <div id="historyList" class="history-list"></div>
+  <div id="historyDetail" class="history-detail" style="display:none;"></div>
+  <div id="shoppingListEl" class="history-list" style="display:none;"></div>
+</div>
+
+<!-- Cook Mode -->
+<div id="cookModeOverlay" class="cook-overlay" style="display:none;">
+  <div class="cook-header">
+    <button id="cookCloseBtn" class="cook-close">✕ Exit</button>
+    <div class="cook-title" id="cookTitle"></div>
+    <div class="cook-progress" id="cookProgress"></div>
+  </div>
+  <div class="cook-body">
+    <div class="cook-step-text" id="cookStepText"></div>
+    <div class="cook-timer" id="cookTimerArea" style="display:none;">
+      <div class="cook-timer-display" id="cookTimerDisplay"></div>
+      <div class="cook-timer-controls">
+        <button id="cookTimerStartBtn" class="primary">Start Timer</button>
+        <button id="cookTimerResetBtn" class="ghost">Reset</button>
+      </div>
+    </div>
+  </div>
+  <div class="cook-footer">
+    <button id="cookPrevBtn" class="cook-prev">← Previous</button>
+    <button id="cookNextBtn" class="cook-next">Next →</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  // ---------- Tab switching ----------
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const panels = document.querySelectorAll('.panel');
+  const pageTitle = document.getElementById('pageTitle');
+  const pageSub = document.getElementById('pageSub');
+
+  const TAB_COPY = {
+    reverse: {
+      title: 'Photograph a bake.<br>Get the recipe back.',
+      sub: "Point it at a finished bake and it reverse-engineers the recipe — then adjust it for whatever you actually need."
+    },
+    combine: {
+      title: 'Got ingredients?<br>Get a recipe.',
+      sub: "Tell it what's in your kitchen and what you're craving — it builds something real from what you actually have."
+    },
+    build: {
+      title: 'Set the constraints.<br>It designs the recipe.',
+      sub: "Dietary needs, flavor profile, or just a mood — get a recipe built from scratch around exactly what you need."
+    },
+    validate: {
+      title: 'Know what<br>actually matters.',
+      sub: "Check any dish against the techniques that genuinely make it work, versus what's just personal preference."
+    }
+  };
+
+  function setHeaderFor(tab){
+    const copy = TAB_COPY[tab];
+    if(!copy) return;
+    pageTitle.innerHTML = copy.title;
+    pageSub.textContent = copy.sub;
+  }
+
+  tabBtns.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      tabBtns.forEach(b=>b.classList.remove('active'));
+      panels.forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+      setHeaderFor(btn.dataset.tab);
+    });
+  });
+
+  // ---------- Claude API helper ----------
+  async function callClaude(messages, maxTokens){
+    const resp = await fetch("/api/message", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        max_tokens: maxTokens || 3500,
+        messages: messages
+      })
+    });
+    if(!resp.ok){
+      let detail = '';
+      try{
+        const errBody = await resp.json();
+        detail = (errBody.error && errBody.error.message) ? errBody.error.message : JSON.stringify(errBody);
+      }catch(e){}
+      throw new Error(detail || ("Request failed ("+resp.status+")"));
+    }
+    const data = await resp.json();
+    const textBlock = data.content.find(b=>b.type==='text');
+    if(!textBlock) throw new Error("No text response from model");
+    return textBlock.text;
+  }
+
+  function extractJSON(text){
+    const cleaned = text.replace(/```json/gi,'').replace(/```/g,'').trim();
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if(start === -1 || end === -1) throw new Error("Could not parse a recipe from the response");
+    try{
+      return JSON.parse(cleaned.slice(start, end+1));
+    }catch(e){
+      throw new Error("The response got cut off before it finished — try again");
+    }
+  }
+
+  function escapeHTML(str){
+    if(str === undefined || str === null) return '';
+    const div = document.createElement('div');
+    div.textContent = String(str);
+    return div.innerHTML;
+  }
+
+  // Shared quality bar appended to every recipe-generating prompt, so every
+  // flow (reverse bake, combine, build, modify) is held to the same
+  // real-world feasibility standard, not just "looks plausible."
+  const QUALITY_BAR = `
+Before finalizing, sanity-check this like an experienced baker would — this must be a recipe someone could follow exactly as written and get a genuinely good, edible result, not just a plausible-looking ingredient list:
+- Ratios must be structurally realistic for the batch size: enough flour/starch or binding agent to hold the intended texture, correct liquid-to-dry ratio, and a leavening amount that actually matches the volume.
+- Potent flavorings (matcha, espresso powder, extracts, spices, citrus zest, etc.) must be at realistic, professionally-calibrated amounts for the batch size — enough to be noticeable, not so much that the result turns bitter, overpowering, or inedible. When unsure, use less rather than more.
+- The technique described must actually produce the texture implied by the title and description.
+- When uncertain about a ratio, default to standard, well-tested baking proportions rather than an unusual one.`;
+
+  function formatAmount(n){
+    if(Number.isInteger(n)) return String(n);
+    const rounded = Math.round(n*4)/4;
+    return rounded.toString();
+  }
+
+  // ---------- Shared side panel (History / Shopping List) ----------
+  const historyToggleBtn = document.getElementById('historyToggleBtn');
+  const shoppingToggleBtn = document.getElementById('shoppingToggleBtn');
+  const sidePanel = document.getElementById('sidePanel');
+  const sidePanelTitle = document.getElementById('sidePanelTitle');
+  const sidePanelCloseBtn = document.getElementById('sidePanelCloseBtn');
+  const historyCount = document.getElementById('historyCount');
+  const historyList = document.getElementById('historyList');
+  const historyDetail = document.getElementById('historyDetail');
+  const shoppingCount = document.getElementById('shoppingCount');
+  const shoppingListEl = document.getElementById('shoppingListEl');
+
+  let sidePanelMode = 'history';
+
+  function openSidePanel(mode){
+    sidePanelMode = mode;
+    sidePanel.style.display = 'flex';
+    historyList.style.display = 'none';
+    historyDetail.style.display = 'none';
+    shoppingListEl.style.display = 'none';
+    if(mode === 'history'){
+      sidePanelTitle.textContent = 'Session History';
+      renderHistoryList();
+    }else{
+      sidePanelTitle.textContent = 'Shopping List';
+      shoppingListEl.style.display = 'block';
+      renderShoppingList();
+    }
+  }
+
+  historyToggleBtn.addEventListener('click', ()=>{
+    if(sidePanel.style.display !== 'none' && sidePanelMode === 'history'){
+      sidePanel.style.display = 'none';
+    }else{
+      openSidePanel('history');
+    }
+  });
+  shoppingToggleBtn.addEventListener('click', ()=>{
+    if(sidePanel.style.display !== 'none' && sidePanelMode === 'shopping'){
+      sidePanel.style.display = 'none';
+    }else{
+      openSidePanel('shopping');
+    }
+  });
+  sidePanelCloseBtn.addEventListener('click', ()=>{
+    sidePanel.style.display = 'none';
+  });
+
+  // ---------- Session History ----------
+  let sessionHistory = [];
+
+  function addToHistory(recipe, tabLabel){
+    sessionHistory.unshift({
+      id: 'h' + Date.now() + Math.random().toString(36).slice(2, 7),
+      title: recipe.title || 'Untitled recipe',
+      tab: tabLabel,
+      recipe: recipe,
+      time: new Date()
+    });
+    historyCount.textContent = `(${sessionHistory.length})`;
+    if(sidePanel.style.display !== 'none' && sidePanelMode === 'history' && historyDetail.style.display === 'none'){
+      renderHistoryList();
+    }
+  }
+
+  function timeAgo(date){
+    const secs = Math.floor((Date.now() - date.getTime()) / 1000);
+    if(secs < 60) return 'just now';
+    const mins = Math.floor(secs / 60);
+    if(mins < 60) return `${mins} min ago`;
+    const hrs = Math.floor(mins / 60);
+    return `${hrs} hr ago`;
+  }
+
+  function renderHistoryList(){
+    historyDetail.style.display = 'none';
+    historyDetail.innerHTML = '';
+    historyList.style.display = 'block';
+    if(!sessionHistory.length){
+      historyList.innerHTML = '<div class="history-empty">Recipes you generate this session will show up here.</div>';
+      return;
+    }
+    historyList.innerHTML = sessionHistory.map(entry => `
+      <button class="history-entry" data-id="${entry.id}">
+        <div class="h-title">${escapeHTML(entry.title)}</div>
+        <div class="h-meta">${escapeHTML(entry.tab)} · ${escapeHTML(timeAgo(entry.time))}</div>
+      </button>
+    `).join('');
+    historyList.querySelectorAll('.history-entry').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const entry = sessionHistory.find(e => e.id === btn.dataset.id);
+        if(entry) showHistoryDetail(entry);
+      });
+    });
+  }
+
+  function showHistoryDetail(entry){
+    historyList.style.display = 'none';
+    historyDetail.style.display = 'block';
+    historyDetail.innerHTML = `<button class="history-back">← Back to list</button><div class="history-recipe-slot"></div>`;
+    historyDetail.querySelector('.history-back').addEventListener('click', renderHistoryList);
+    const slot = historyDetail.querySelector('.history-recipe-slot');
+    const controller = makeRecipeController(slot);
+    controller.setRecipe(entry.recipe);
+  }
+
+  // ---------- Shopping List ----------
+  let shoppingList = []; // {id, name, amount, recipeTitle, bought}
+
+  function addToShoppingList(name, amountStr, recipeTitle){
+    shoppingList.push({
+      id: 's' + Date.now() + Math.random().toString(36).slice(2, 7),
+      name, amount: amountStr, recipeTitle, bought: false
+    });
+    updateShoppingBadge();
+    if(sidePanel.style.display !== 'none' && sidePanelMode === 'shopping'){
+      renderShoppingList();
+    }
+  }
+
+  function updateShoppingBadge(){
+    shoppingCount.textContent = `(${shoppingList.filter(i=>!i.bought).length})`;
+  }
+
+  function renderShoppingList(){
+    if(!shoppingList.length){
+      shoppingListEl.innerHTML = `<div class="history-empty">Mark an ingredient "I don't have this" on any recipe and it'll show up here.</div>`;
+      return;
+    }
+    shoppingListEl.innerHTML = shoppingList.map(item => `
+      <div class="shopping-item ${item.bought ? 'bought' : ''}">
+        <label class="shopping-check">
+          <input type="checkbox" class="shopping-checkbox" data-id="${item.id}" ${item.bought ? 'checked' : ''}>
+          <span class="shopping-item-text">${escapeHTML(item.amount ? item.amount + ' ' : '')}${escapeHTML(item.name)}</span>
+        </label>
+        <div class="shopping-item-meta">${escapeHTML(item.recipeTitle || '')}</div>
+        <button class="shopping-remove" data-id="${item.id}">✕</button>
+      </div>
+    `).join('');
+    shoppingListEl.querySelectorAll('.shopping-checkbox').forEach(cb=>{
+      cb.addEventListener('change', ()=>{
+        const item = shoppingList.find(i => i.id === cb.dataset.id);
+        if(item){ item.bought = cb.checked; updateShoppingBadge(); renderShoppingList(); }
+      });
+    });
+    shoppingListEl.querySelectorAll('.shopping-remove').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        shoppingList = shoppingList.filter(i => i.id !== btn.dataset.id);
+        updateShoppingBadge();
+        renderShoppingList();
+      });
+    });
+  }
+
+  // ---------- Cook Mode ----------
+  const cookModeOverlay = document.getElementById('cookModeOverlay');
+  const cookTitle = document.getElementById('cookTitle');
+  const cookProgress = document.getElementById('cookProgress');
+  const cookStepText = document.getElementById('cookStepText');
+  const cookTimerArea = document.getElementById('cookTimerArea');
+  const cookTimerDisplay = document.getElementById('cookTimerDisplay');
+  const cookTimerStartBtn = document.getElementById('cookTimerStartBtn');
+  const cookTimerResetBtn = document.getElementById('cookTimerResetBtn');
+  const cookPrevBtn = document.getElementById('cookPrevBtn');
+  const cookNextBtn = document.getElementById('cookNextBtn');
+  const cookCloseBtn = document.getElementById('cookCloseBtn');
+
+  let cookSteps = [];
+  let cookIndex = 0;
+  let cookTimerInterval = null;
+  let cookTimerRemaining = 0;
+
+  function openCookMode(recipe){
+    if(!recipe || !recipe.steps || !recipe.steps.length) return;
+    cookSteps = recipe.steps.map(s => (typeof s === 'string') ? {text: s, timer_minutes: null} : s);
+    cookIndex = 0;
+    cookTitle.textContent = recipe.title || '';
+    cookModeOverlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    renderCookStep();
+  }
+
+  function closeCookMode(){
+    cookModeOverlay.style.display = 'none';
+    document.body.style.overflow = '';
+    clearCookTimer();
+  }
+
+  function clearCookTimer(){
+    if(cookTimerInterval){ clearInterval(cookTimerInterval); cookTimerInterval = null; }
+  }
+
+  function formatCookTime(seconds){
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+  function renderCookStep(){
+    clearCookTimer();
+    const step = cookSteps[cookIndex];
+    cookProgress.textContent = `Step ${cookIndex + 1} of ${cookSteps.length}`;
+    cookStepText.textContent = step.text;
+    cookPrevBtn.disabled = (cookIndex === 0);
+    cookNextBtn.textContent = (cookIndex === cookSteps.length - 1) ? 'Done ✓' : 'Next →';
+
+    if(step.timer_minutes){
+      cookTimerArea.style.display = 'flex';
+      cookTimerRemaining = step.timer_minutes * 60;
+      cookTimerDisplay.textContent = formatCookTime(cookTimerRemaining);
+      cookTimerDisplay.classList.remove('done');
+      cookTimerStartBtn.textContent = 'Start Timer';
+      cookTimerStartBtn.disabled = false;
+    }else{
+      cookTimerArea.style.display = 'none';
+    }
+  }
+
+  cookTimerStartBtn.addEventListener('click', ()=>{
+    if(cookTimerInterval) return;
+    cookTimerStartBtn.disabled = true;
+    cookTimerInterval = setInterval(()=>{
+      cookTimerRemaining--;
+      if(cookTimerRemaining <= 0){
+        cookTimerRemaining = 0;
+        cookTimerDisplay.textContent = "Done!";
+        cookTimerDisplay.classList.add('done');
+        clearCookTimer();
+        cookTimerStartBtn.disabled = false;
+        cookTimerStartBtn.textContent = 'Start Timer';
+        return;
+      }
+      cookTimerDisplay.textContent = formatCookTime(cookTimerRemaining);
+    }, 1000);
+  });
+  cookTimerResetBtn.addEventListener('click', ()=>{
+    clearCookTimer();
+    const step = cookSteps[cookIndex];
+    if(step && step.timer_minutes){
+      cookTimerRemaining = step.timer_minutes * 60;
+      cookTimerDisplay.textContent = formatCookTime(cookTimerRemaining);
+      cookTimerDisplay.classList.remove('done');
+      cookTimerStartBtn.disabled = false;
+      cookTimerStartBtn.textContent = 'Start Timer';
+    }
+  });
+  cookPrevBtn.addEventListener('click', ()=>{
+    if(cookIndex > 0){ cookIndex--; renderCookStep(); }
+  });
+  cookNextBtn.addEventListener('click', ()=>{
+    if(cookIndex < cookSteps.length - 1){ cookIndex++; renderCookStep(); }
+    else{ closeCookMode(); }
+  });
+  cookCloseBtn.addEventListener('click', closeCookMode);
+
+  // ---------- Reusable recipe-card controller ----------
+  // Each caller gets its own independent copy of recipe state and rendering,
+  // scoped entirely to its own output container (no shared/global element IDs).
+  function makeRecipeController(outputEl){
+    let currentRecipe = null;
+    let baseServings = 1;
+    let currentMultiplier = 1;
+
+    function setRecipe(recipe){
+      currentRecipe = recipe;
+      baseServings = recipe.servings || 1;
+      currentMultiplier = 1;
+      render();
+    }
+
+    function render(changes){
+      if(!currentRecipe) return;
+      const r = currentRecipe;
+      const scaledServings = Math.round(baseServings * currentMultiplier);
+
+      const changedFields = new Set();
+      if(changes) changes.forEach(c => changedFields.add((c.field||'').toLowerCase()));
+
+      let html = `<div class="recipe">`;
+      html += `<h3 class="recipe-title">${escapeHTML(r.title)}</h3>`;
+      html += `<p class="recipe-desc">${escapeHTML(r.description||'')}</p>`;
+      if(r.confidence_note){
+        html += `<div class="confidence">${escapeHTML(r.confidence_note)}</div>`;
+      }
+
+      if(r.grounding && r.grounding.matches && r.grounding.matches.length){
+        const total = r.grounding.matches.length;
+        const satisfiedCount = r.grounding.matches.filter(m=>m.satisfied).length;
+        html += `<details class="grounding-badge">
+          <summary class="grounding-summary">🔎 Cross-checked against ${total} baking essential${total===1?'':'s'} · ${satisfiedCount}/${total} confirmed</summary>
+          <div class="grounding-list">`;
+        r.grounding.matches.forEach(m=>{
+          const cls = m.satisfied ? 'satisfied' : 'unsatisfied';
+          const icon = m.satisfied ? '✓' : '⚠';
+          html += `<div class="grounding-item ${cls}"><span class="g-icon">${icon}</span><span><b>${escapeHTML(m.item)}:</b> ${escapeHTML(m.note || '')}</span></div>`;
+        });
+        html += `</div></details>`;
+      }
+
+      if(r.time_estimate && r.time_estimate.total_minutes != null){
+        const t = r.time_estimate;
+        const parts = [];
+        if(t.prep_minutes != null) parts.push(`${t.prep_minutes} prep`);
+        if(t.inactive_minutes) parts.push(`${t.inactive_minutes} rise/rest`);
+        if(t.bake_minutes != null) parts.push(`${t.bake_minutes} bake`);
+        // Recompute the total ourselves rather than trusting the model's arithmetic —
+        // guarantees the headline number always matches the breakdown shown beside it.
+        const computedTotal = (t.prep_minutes||0) + (t.inactive_minutes||0) + (t.bake_minutes||0);
+        const displayTotal = computedTotal || t.total_minutes;
+        const breakdown = parts.length ? ` (${parts.join(' + ')} min)` : '';
+        html += `<div class="time-strip">⏱ <span class="time-total">${escapeHTML(displayTotal)} min total</span>${breakdown}</div>`;
+      }
+
+      if(r.nutrition_per_serving){
+        const n = r.nutrition_per_serving;
+        const unitLabel = r.serving_unit || 'serving';
+        html += `<div class="nutrition-strip">
+          <div class="nutrition-label">Per ${escapeHTML(unitLabel)} (estimate)</div>
+          ${n.calories!=null ? `<div class="nutrition-item"><span class="val">${escapeHTML(n.calories)}</span><span class="unit">cal</span></div>` : ''}
+          ${n.protein_g!=null ? `<div class="nutrition-item"><span class="val">${escapeHTML(n.protein_g)}g</span><span class="unit">protein</span></div>` : ''}
+          ${n.carbs_g!=null ? `<div class="nutrition-item"><span class="val">${escapeHTML(n.carbs_g)}g</span><span class="unit">carbs</span></div>` : ''}
+          ${n.fat_g!=null ? `<div class="nutrition-item"><span class="val">${escapeHTML(n.fat_g)}g</span><span class="unit">fat</span></div>` : ''}
+          ${n.sugar_g!=null ? `<div class="nutrition-item"><span class="val">${escapeHTML(n.sugar_g)}g</span><span class="unit">sugar</span></div>` : ''}
+        </div>`;
+      }
+
+      html += `<div class="servings-row">
+        <span>Servings</span>
+        <button class="servDown">–</button>
+        <span class="servings-count">${scaledServings}</span>
+        <button class="servUp">+</button>
+        <button class="ghost startCookBtn">▶ Start Cooking</button>
+      </div>`;
+
+      html += `<div class="recipe-section-label">Ingredients</div><ul class="ingredients">`;
+      (r.ingredients||[]).forEach((ing, ingIdx)=>{
+        const scaled = (ing.amount || 0) * currentMultiplier;
+        const amtStr = scaled ? formatAmount(scaled) + (ing.unit ? ' '+ing.unit : '') : '';
+        const isChanged = changedFields.has((ing.name||'').toLowerCase());
+        const searchQuery = encodeURIComponent(ing.name || '');
+        html += `<li>
+          <div class="ing-row">
+            <span class="amt">${escapeHTML(amtStr)}</span>
+            <span class="ing-name ${isChanged?'changed':''}">${escapeHTML(ing.name)}</span>
+            <button class="dont-have-btn" data-ing-idx="${ingIdx}">I don't have this</button>
+          </div>
+          <div class="ing-buy-panel" data-ing-idx="${ingIdx}" style="display:none;">
+            <button class="add-to-list-btn" data-ing-idx="${ingIdx}" data-name="${escapeHTML(ing.name)}" data-amt="${escapeHTML(amtStr)}">+ Add to shopping list</button>
+            <div class="buy-links">
+              <span class="buy-links-label">Buy it:</span>
+              <a href="https://www.amazon.com/s?k=${searchQuery}" target="_blank" rel="noopener">Amazon</a>
+              <a href="https://www.walmart.com/search?q=${searchQuery}" target="_blank" rel="noopener">Walmart</a>
+              <a href="https://www.instacart.com/store/search/${searchQuery}" target="_blank" rel="noopener">Instacart</a>
+            </div>
+          </div>
+        </li>`;
+      });
+      html += `</ul>`;
+
+      html += `<div class="recipe-section-label">Steps</div><ol class="steps">`;
+      (r.steps||[]).forEach(step=>{
+        const stepText = (typeof step === 'string') ? step : step.text;
+        html += `<li>${escapeHTML(stepText)}</li>`;
+      });
+      html += `</ol>`;
+
+      if(changes && changes.length){
+        html += `<div class="changes-box"><h4>What changed</h4>`;
+        changes.forEach(c=>{
+          html += `<div class="change-item"><b>${escapeHTML(c.field)}:</b> ${escapeHTML(c.before)} → ${escapeHTML(c.after)}<br>${escapeHTML(c.reason||'')}</div>`;
+        });
+        html += `</div>`;
+      }
+      html += `</div>`;
+
+      html += `<div class="mod-section">
+        <div class="recipe-section-label">Adjust this recipe</div>
+        <div class="chip-row modChips">
+          <span class="chip" data-mod="Make it gluten-free">Gluten-free</span>
+          <span class="chip" data-mod="Make it vegan">Vegan</span>
+          <span class="chip" data-mod="Remove the eggs">No eggs</span>
+          <span class="chip" data-mod="Make it less sweet">Less sweet</span>
+          <span class="chip" data-mod="Double the batch">Double it</span>
+        </div>
+        <div class="time-select-row">
+          <label class="field-label">Want to save time?</label>
+          <select class="timeGoalSelect">
+            <option value="">No target</option>
+            <option value="20">Under 20 min total</option>
+            <option value="30">Under 30 min total</option>
+            <option value="45">Under 45 min total</option>
+            <option value="60">Under 1 hour total</option>
+            <option value="90">Under 90 min total</option>
+          </select>
+        </div>
+        <textarea class="modInput" rows="2" placeholder="Or type your own change, e.g. 'swap butter for olive oil'"></textarea>
+        <div style="margin-top:10px;">
+          <button class="primary modBtn">Adjust recipe</button>
+        </div>
+        <div class="loading modLoading" style="display:none;">
+          <div class="spinner"></div><span>Reworking the ratios…</span>
+        </div>
+        <div class="error modError" style="display:none;"></div>
+      </div>`;
+
+      outputEl.innerHTML = html;
+
+      outputEl.querySelectorAll('.dont-have-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const panel = outputEl.querySelector(`.ing-buy-panel[data-ing-idx="${btn.dataset.ingIdx}"]`);
+          if(panel) panel.style.display = (panel.style.display === 'none') ? 'flex' : 'none';
+        });
+      });
+      outputEl.querySelectorAll('.add-to-list-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          addToShoppingList(btn.dataset.name, btn.dataset.amt, currentRecipe ? currentRecipe.title : '');
+          btn.textContent = 'Added ✓';
+          btn.classList.add('added');
+          btn.disabled = true;
+        });
+      });
+      outputEl.querySelector('.startCookBtn').addEventListener('click', ()=>{
+        openCookMode(currentRecipe);
+      });
+      outputEl.querySelector('.servUp').addEventListener('click', ()=>{
+        currentMultiplier = (scaledServings+1)/baseServings;
+        render(changes);
+      });
+      outputEl.querySelector('.servDown').addEventListener('click', ()=>{
+        const next = Math.max(1, scaledServings-1);
+        currentMultiplier = next/baseServings;
+        render(changes);
+      });
+      outputEl.querySelectorAll('.modChips .chip').forEach(chip=>{
+        chip.addEventListener('click', ()=>{
+          outputEl.querySelector('.modInput').value = chip.dataset.mod;
+        });
+      });
+      outputEl.querySelector('.modBtn').addEventListener('click', ()=>runModification());
+      outputEl.querySelector('.timeGoalSelect').addEventListener('change', (e)=>{
+        const minutes = e.target.value;
+        if(!minutes) return;
+        runModification(`The user wants this recipe to take no more than ${minutes} minutes total (prep + inactive rise/chill time + bake/cook, all combined) if realistically achievable. Simplify technique, reduce steps, or adjust ingredients as needed to hit this target — while keeping the result structurally sound and tasty. If it truly cannot be done well in that time, get as close as possible and say so plainly in confidence_note.`);
+      });
+    }
+
+    async function runModification(explicitRequest){
+      const input = outputEl.querySelector('.modInput');
+      const modLoading = outputEl.querySelector('.modLoading');
+      const modError = outputEl.querySelector('.modError');
+      const request = (typeof explicitRequest === 'string') ? explicitRequest : input.value.trim();
+      if(!request || !currentRecipe) return;
+
+      modError.style.display = 'none';
+      modLoading.style.display = 'flex';
+      outputEl.querySelector('.modBtn').disabled = true;
+
+      const prompt = `You are a baking-science expert adjusting an existing recipe.
+Current recipe (JSON): ${JSON.stringify(currentRecipe)}
+
+Requested change: "${request}"
+
+Adjust ingredients AND technique as needed — not just ingredient swaps. For example, egg substitutes often need extra binding or leavening compensation; gluten-free flour blends usually need different hydration; removing sugar changes browning and moisture, so technique may need to change too.
+
+Respond with ONLY a JSON object, no preamble, no markdown fences, matching exactly:
+{
+  "title": "string",
+  "description": "string",
+  "servings": number,
+  "serving_unit": "string, the natural single unit, e.g. 'cookie', 'slice', 'muffin'",
+  "confidence_note": "string",
+  "ingredients": [ {"amount": number, "unit": "string", "name": "string"} ],
+  "steps": [ {"text": "string, the instruction — include the specific measurement/amount inline for every ingredient this step uses (e.g. 'Whisk 2 cups flour, 1 tsp salt, and 3 tbsp sugar', not 'Whisk flour, salt, and sugar'), so the step is fully self-contained without needing to check the ingredients list separately", "timer_minutes": number or null (set a number only if this step involves waiting — baking, rising, proofing, chilling, resting, boiling, simmering; null for active hands-on steps)"} ],
+  "nutrition_per_serving": {"calories": number, "protein_g": number, "carbs_g": number, "fat_g": number, "sugar_g": number},
+  "time_estimate": {"prep_minutes": number, "inactive_minutes": number (rising, chilling, resting, proofing — 0 if none), "bake_minutes": number, "total_minutes": number (must exactly equal prep_minutes + inactive_minutes + bake_minutes)},
+  "changes": [ {"field": "ingredient or step name that changed", "before": "short description", "after": "short description", "reason": "one short sentence on the baking-science reason"} ]
+}
+Recalculate nutrition_per_serving and time_estimate to reflect the modified recipe — don't just carry over old numbers. List every ingredient in the final recipe (not just changed ones). Only list genuinely changed items in "changes".
+${QUALITY_BAR}
+Keep it concise: short steps (one sentence each), reasons under 15 words each.`;
+
+      try{
+        const text = await callClaude([{role:"user", content: prompt}]);
+        const result = extractJSON(text);
+        const changes = result.changes || [];
+        delete result.changes;
+        currentRecipe = result;
+        baseServings = result.servings || baseServings;
+        currentMultiplier = 1;
+        render(changes);
+      }catch(err){
+        modError.textContent = "Couldn't apply that change — try rephrasing it. (" + err.message + ")";
+        modError.style.display = 'block';
+      }finally{
+        modLoading.style.display = 'none';
+      }
+    }
+
+    return { setRecipe, applyModification: runModification, getRecipe: ()=>currentRecipe };
+  }
+
+  // ---------- Reverse Bake ----------
+  let uploadedImageBase64 = null;
+  let uploadedImageMediaType = null;
+
+  const dropzone = document.getElementById('dropzone');
+  const fileInput = document.getElementById('fileInput');
+  const previewImg = document.getElementById('previewImg');
+  const reverseControls = document.getElementById('reverseControls');
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const clearBtn = document.getElementById('clearBtn');
+  const reverseLoading = document.getElementById('reverseLoading');
+  const reverseError = document.getElementById('reverseError');
+  const recipeOutput = document.getElementById('recipeOutput');
+  const reverseController = makeRecipeController(recipeOutput);
+
+  dropzone.addEventListener('click', ()=>fileInput.click());
+  dropzone.addEventListener('dragover', e=>{e.preventDefault(); dropzone.classList.add('drag');});
+  dropzone.addEventListener('dragleave', ()=>dropzone.classList.remove('drag'));
+  dropzone.addEventListener('drop', e=>{
+    e.preventDefault();
+    dropzone.classList.remove('drag');
+    if(e.dataTransfer.files && e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', e=>{
+    if(e.target.files && e.target.files[0]) handleFile(e.target.files[0]);
+  });
+
+  function handleFile(file){
+    if(!file.type.startsWith('image/')) return;
+    uploadedImageMediaType = file.type;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      uploadedImageBase64 = reader.result.split(',')[1];
+      previewImg.src = reader.result;
+      previewImg.style.display = 'block';
+      reverseControls.style.display = 'block';
+      recipeOutput.innerHTML = '';
+      reverseError.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  clearBtn.addEventListener('click', ()=>{
+    uploadedImageBase64 = null;
+    previewImg.style.display = 'none';
+    reverseControls.style.display = 'none';
+    recipeOutput.innerHTML = '';
+    fileInput.value = '';
+  });
+
+  analyzeBtn.addEventListener('click', async ()=>{
+    reverseError.style.display = 'none';
+    reverseLoading.style.display = 'flex';
+    analyzeBtn.disabled = true;
+    recipeOutput.innerHTML = '';
+
+    const prompt = `You are a professional baker reverse-engineering a recipe from a photo of a finished baked good.
+Look closely at crumb structure, color/browning, glaze or coating, shape, and any visible cross-section.
+Respond with ONLY a JSON object, no preamble, no markdown fences, matching exactly this shape:
+{
+  "title": "string, name of the baked good",
+  "description": "1-2 sentence description of what you see and infer",
+  "servings": number (a sensible batch size, e.g. 12 for cookies, 8 for a cake),
+  "serving_unit": "string, the natural single unit, e.g. 'cookie', 'slice', 'muffin'",
+  "confidence_note": "one short sentence on how confident you are and why, based on visual cues",
+  "ingredients": [ {"amount": number, "unit": "string like cup, tsp, g, or empty string for whole items", "name": "string"} ],
+  "steps": [ {"text": "string, the instruction — include the specific measurement/amount inline for every ingredient this step uses (e.g. 'Whisk 2 cups flour, 1 tsp salt, and 3 tbsp sugar', not 'Whisk flour, salt, and sugar'), so the step is fully self-contained without needing to check the ingredients list separately", "timer_minutes": number or null (set a number only if this step involves waiting — baking, rising, proofing, chilling, resting, boiling, simmering; null for active hands-on steps)"} ],
+  "nutrition_per_serving": {"calories": number, "protein_g": number, "carbs_g": number, "fat_g": number, "sugar_g": number},
+  "time_estimate": {"prep_minutes": number, "inactive_minutes": number (rising, chilling, resting, proofing — 0 if none), "bake_minutes": number, "total_minutes": number (must exactly equal prep_minutes + inactive_minutes + bake_minutes)},
+  "grounding": {"matches": [ {"item": "string, short label for a well-known structural essential for this type of baked good", "satisfied": true/false, "note": "one short sentence on whether/how this recipe satisfies it"} ]}
+}
+Give a complete, realistic, bakeable recipe.
+${QUALITY_BAR}
+For "grounding", separately think like a recipe editor fact-checking your own output: list 3-5 structural essentials that any reliable, well-tested recipe for this specific baked good would be expected to get right (the same kind of things true across most published versions — e.g. "chilled dough" for cut-out cookies, "properly proofed dough" for yeasted bread), and honestly mark whether the recipe you just wrote actually satisfies each one. It's fine and expected for some to be marked false if genuinely uncertain from the photo.
+Estimate nutrition_per_serving as a reasonable approximation for one serving_unit based on the ingredients and batch size — label it as an estimate, don't overthink precision. Keep it concise: 6-9 ingredients, 5-7 short steps (one sentence each), description under 25 words, confidence_note under 20 words, grounding notes under 15 words each.`;
+
+    try{
+      const text = await callClaude([{
+        role: "user",
+        content: [
+          {type:"image", source:{type:"base64", media_type: uploadedImageMediaType, data: uploadedImageBase64}},
+          {type:"text", text: prompt}
+        ]
+      }]);
+      const recipe = extractJSON(text);
+      reverseController.setRecipe(recipe);
+      addToHistory(recipe, 'Reverse Bake');
+    }catch(err){
+      reverseError.textContent = "Couldn't read a recipe from that photo — try a clearer, well-lit shot. (" + err.message + ")";
+      reverseError.style.display = 'block';
+    }finally{
+      reverseLoading.style.display = 'none';
+      analyzeBtn.disabled = false;
+    }
+  });
+
+  // ---------- Combine ----------
+  const combineIngredients = document.getElementById('combineIngredients');
+  const combineGoal = document.getElementById('combineGoal');
+  const combineBtn = document.getElementById('combineBtn');
+  const combineLoading = document.getElementById('combineLoading');
+  const combineError = document.getElementById('combineError');
+  const combineOutput = document.getElementById('combineOutput');
+  let combineController = null;
+
+  document.querySelectorAll('#combineGoalChips .chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      combineGoal.value = chip.dataset.goal;
+    });
+  });
+
+  function renderSuggestions(panelEl, suggestions){
+    if(!suggestions || !suggestions.length){
+      return '';
+    }
+    let html = `<div class="suggestions-title">Could make this even better</div>`;
+    suggestions.forEach((s, i)=>{
+      html += `<div class="suggestion-card" data-idx="${i}">
+        <div class="suggestion-icon">${escapeHTML(s.emoji || '✨')}</div>
+        <div class="suggestion-body">
+          <div class="suggestion-name">${escapeHTML(s.name)}</div>
+          <div class="suggestion-reason">${escapeHTML(s.reason || '')}</div>
+          <div class="suggestion-actions">
+            <button class="sugg-yes" data-idx="${i}">Have it</button>
+            <button class="sugg-no" data-idx="${i}">Skip</button>
+          </div>
+        </div>
+      </div>`;
+    });
+    return html;
+  }
+
+  function wireSuggestions(panelEl, suggestions, controllerGetter, ingredientsEl){
+    panelEl.querySelectorAll('.sugg-yes[data-idx]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const idx = +btn.dataset.idx;
+        const item = suggestions[idx];
+        const card = panelEl.querySelector(`.suggestion-card[data-idx="${idx}"]`);
+        card.classList.add('added');
+        card.querySelectorAll('button').forEach(b=>b.disabled = true);
+        card.querySelector('.suggestion-actions').insertAdjacentHTML('beforeend', '<span class="suggestion-added-tag">Added ✓</span>');
+
+        if(ingredientsEl){
+          const current = ingredientsEl.value.trim();
+          if(!current.toLowerCase().includes(item.name.toLowerCase())){
+            ingredientsEl.value = current ? current + ', ' + item.name : item.name;
+          }
+        }
+        const controller = controllerGetter();
+        if(controller){
+          controller.applyModification(`Incorporate ${item.name} into the recipe. ${item.reason || ''}`);
+        }
+      });
+    });
+    panelEl.querySelectorAll('.sugg-no[data-idx]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const idx = +btn.dataset.idx;
+        const card = panelEl.querySelector(`.suggestion-card[data-idx="${idx}"]`);
+        card.classList.add('skipped');
+        card.querySelectorAll('button').forEach(b=>b.disabled = true);
+      });
+    });
+  }
+
+  function renderFlagged(flagged){
+    if(!flagged || !flagged.length) return '';
+    let html = `<div class="suggestions-title" style="color:var(--jam);">Might not fit</div>`;
+    flagged.forEach((f, i)=>{
+      html += `<div class="suggestion-card flag-card" data-flag-idx="${i}">
+        <div class="suggestion-icon">${escapeHTML(f.emoji || '⚠️')}</div>
+        <div class="suggestion-body">
+          <div class="suggestion-name">${escapeHTML(f.name)}</div>
+          <div class="suggestion-reason">${escapeHTML(f.reason || '')}</div>
+          <div class="suggestion-actions">
+            <button class="flag-remove-btn" data-flag-idx="${i}">Remove &amp; rebuild</button>
+            <button class="sugg-no" data-flag-idx="${i}">Keep it</button>
+          </div>
+        </div>
+      </div>`;
+    });
+    return html;
+  }
+
+  function removeIngredientFromList(text, name){
+    const parts = text.split(',').map(s=>s.trim()).filter(Boolean);
+    const filtered = parts.filter(p =>
+      p.toLowerCase() !== name.toLowerCase() &&
+      !p.toLowerCase().includes(name.toLowerCase())
+    );
+    return filtered.join(', ');
+  }
+
+  function wireFlagged(panelEl, flagged){
+    panelEl.querySelectorAll('.flag-remove-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const idx = +btn.dataset.flagIdx;
+        const item = flagged[idx];
+        combineIngredients.value = removeIngredientFromList(combineIngredients.value, item.name);
+        runCombine();
+      });
+    });
+    panelEl.querySelectorAll('.sugg-no[data-flag-idx]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const idx = +btn.dataset.flagIdx;
+        const card = panelEl.querySelector(`.suggestion-card[data-flag-idx="${idx}"]`);
+        card.classList.add('skipped');
+        card.querySelectorAll('button').forEach(b=>b.disabled = true);
+      });
+    });
+  }
+
+  async function runCombine(){
+    const ingredients = combineIngredients.value.trim();
+    const goal = combineGoal.value.trim();
+    if(!ingredients){
+      combineError.textContent = "List a few things you have on hand first.";
+      combineError.style.display = 'block';
+      return;
+    }
+
+    combineError.style.display = 'none';
+    combineLoading.style.display = 'flex';
+    combineBtn.disabled = true;
+    combineOutput.innerHTML = '';
+
+    const prompt = `You are a resourceful home baker. Someone has told you what's in their kitchen and what they're in the mood for. Build one complete, realistic, bakeable recipe using primarily what they have on hand — only add 1-2 common pantry staples (salt, water, baking powder) if truly necessary, and note any addition clearly. If an ingredient they listed was flagged as not fitting in a previous round, lean more heavily on the remaining, related ingredients instead.
+
+On hand: "${ingredients}"
+In the mood for: "${goal || 'something good, their choice'}"
+
+Also suggest 2-3 additional ingredients they did NOT list that would genuinely elevate this specific dish (e.g. a spice, extract, topping, or mix-in) — things worth asking "do you happen to have this?"
+
+Separately, check whether any ingredient THEY listed genuinely clashes with the flavor profile of what they're in the mood for (e.g. they listed strawberry but asked for a savory dish, or listed an ingredient that doesn't pair well with the rest). Only flag something if it's a real mismatch, not a minor stretch — most of the time this should be an empty list.
+
+Respond with ONLY a JSON object, no preamble, no markdown fences, matching exactly this shape:
+{
+  "title": "string, name of the dish",
+  "description": "1-2 sentence description of the result and why it fits what they asked for",
+  "servings": number,
+  "serving_unit": "string, the natural single unit, e.g. 'cookie', 'slice', 'muffin'",
+  "confidence_note": "one short sentence noting any pantry staple you added beyond their list, or omit assumptions made",
+  "ingredients": [ {"amount": number, "unit": "string like cup, tsp, g, or empty string for whole items", "name": "string"} ],
+  "steps": [ {"text": "string, the instruction — include the specific measurement/amount inline for every ingredient this step uses (e.g. 'Whisk 2 cups flour, 1 tsp salt, and 3 tbsp sugar', not 'Whisk flour, salt, and sugar'), so the step is fully self-contained without needing to check the ingredients list separately", "timer_minutes": number or null (set a number only if this step involves waiting — baking, rising, proofing, chilling, resting, boiling, simmering; null for active hands-on steps)"} ],
+  "nutrition_per_serving": {"calories": number, "protein_g": number, "carbs_g": number, "fat_g": number, "sugar_g": number},
+  "time_estimate": {"prep_minutes": number, "inactive_minutes": number (rising, chilling, resting, proofing — 0 if none), "bake_minutes": number, "total_minutes": number (must exactly equal prep_minutes + inactive_minutes + bake_minutes)},
+  "suggested_additions": [ {"name": "string, short ingredient name", "reason": "one short sentence on what it would add", "emoji": "a single emoji that represents this ingredient"} ],
+  "flagged_ingredients": [ {"name": "string, must match one of the ingredients they listed on hand", "reason": "one short sentence on why it clashes with the flavor profile", "emoji": "a single emoji representing it"} ]
+}
+Estimate nutrition_per_serving as a reasonable approximation for one serving_unit — label it as an estimate, don't overthink precision.
+${QUALITY_BAR}
+Keep it concise: 5-9 ingredients, 5-7 short steps (one sentence each), description under 25 words, confidence_note under 20 words, 2-3 suggested_additions with reasons under 15 words each, flagged_ingredients only when genuinely warranted.`;
+
+    try{
+      const text = await callClaude([{role:"user", content: prompt}]);
+      const result = extractJSON(text);
+      const suggestions = result.suggested_additions || [];
+      const flagged = result.flagged_ingredients || [];
+      delete result.suggested_additions;
+      delete result.flagged_ingredients;
+
+      combineOutput.innerHTML = `<div class="result-grid">
+        <div class="recipe-slot"></div>
+        <div class="suggestions-panel"></div>
+      </div>`;
+      const recipeSlot = combineOutput.querySelector('.recipe-slot');
+      const suggestionsSlot = combineOutput.querySelector('.suggestions-panel');
+
+      combineController = makeRecipeController(recipeSlot);
+      combineController.setRecipe(result);
+      addToHistory(result, 'Combine');
+
+      const flaggedHTML = renderFlagged(flagged);
+      const suggestionsHTML = renderSuggestions(suggestionsSlot, suggestions);
+      if(!flaggedHTML && !suggestionsHTML){
+        suggestionsSlot.style.display = 'none';
+      }else{
+        suggestionsSlot.style.display = 'flex';
+        suggestionsSlot.innerHTML = flaggedHTML + suggestionsHTML;
+        if(flaggedHTML) wireFlagged(suggestionsSlot, flagged);
+        if(suggestionsHTML) wireSuggestions(suggestionsSlot, suggestions, ()=>combineController, combineIngredients);
+      }
+    }catch(err){
+      combineError.textContent = "Couldn't build a recipe from that — try listing a few more ingredients. (" + err.message + ")";
+      combineError.style.display = 'block';
+    }finally{
+      combineLoading.style.display = 'none';
+      combineBtn.disabled = false;
+    }
+  }
+
+  combineBtn.addEventListener('click', runCombine);
+
+  // ---------- Build ----------
+  const buildDietaryChips = document.getElementById('buildDietaryChips');
+  const buildFlavorChips = document.getElementById('buildFlavorChips');
+  const buildDishType = document.getElementById('buildDishType');
+  const buildBtn = document.getElementById('buildBtn');
+  const buildWildBtn = document.getElementById('buildWildBtn');
+  const buildLoading = document.getElementById('buildLoading');
+  const buildError = document.getElementById('buildError');
+  const buildOutput = document.getElementById('buildOutput');
+  let buildController = null;
+
+  const selectedDietary = new Set();
+  const selectedFlavor = new Set();
+
+  function wireToggleChips(container, selectedSet){
+    container.querySelectorAll('.chip').forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        const val = chip.dataset.value;
+        if(selectedSet.has(val)){
+          selectedSet.delete(val);
+          chip.classList.remove('active');
+        }else{
+          selectedSet.add(val);
+          chip.classList.add('active');
+        }
+      });
+    });
+  }
+  wireToggleChips(buildDietaryChips, selectedDietary);
+  wireToggleChips(buildFlavorChips, selectedFlavor);
+
+  buildBtn.addEventListener('click', ()=>runBuild(false));
+  buildWildBtn.addEventListener('click', ()=>runBuild(true));
+
+  let buildPastTitles = [];
+
+  async function runBuild(wild){
+    if(selectedDietary.size === 0 && selectedFlavor.size === 0 && !buildDishType.value.trim()){
+      buildError.textContent = "Pick at least one constraint or tell it what to make.";
+      buildError.style.display = 'block';
+      return;
+    }
+
+    buildError.style.display = 'none';
+    buildLoading.style.display = 'flex';
+    buildLoading.querySelector('span').textContent = wild
+      ? "Throwing out the obvious ideas…"
+      : "Designing a recipe around your constraints…";
+    buildBtn.disabled = true;
+    buildWildBtn.disabled = true;
+    buildOutput.innerHTML = '';
+
+    const dishType = buildDishType.value.trim();
+    const wildInstruction = wild
+      ? `\nBe genuinely unconventional and surprising this time — think beyond the first, most obvious idea that fits these constraints (avoid the default/expected version of this dish). It should still be realistic, bakeable, and delicious, just an unexpected take.${buildPastTitles.length ? `\nDo not repeat or lightly rename any of these previous ideas: ${buildPastTitles.join(', ')}.` : ''}`
+      : '';
+
+    const prompt = `You are an expert baker inventing a brand-new recipe from scratch based on constraints — not modifying an existing recipe.
+
+Dietary requirements: ${selectedDietary.size ? [...selectedDietary].join(', ') : 'none specified'}
+Flavor profile: ${selectedFlavor.size ? [...selectedFlavor].join(', ') : 'your choice'}
+What to make: ${dishType || 'your choice — pick something that fits the constraints well'}
+${wildInstruction}
+Design a complete, realistic, bakeable recipe that genuinely satisfies every dietary requirement listed (don't just omit an ingredient without compensating — e.g. a vegan recipe needs a real egg replacement strategy, not just "no eggs").
+
+Also suggest 2-3 optional additions (a topping, mix-in, or garnish) that would elevate this specific recipe without breaking any of the stated dietary requirements.
+
+Respond with ONLY a JSON object, no preamble, no markdown fences, matching exactly this shape:
+{
+  "title": "string, name of the dish",
+  "description": "1-2 sentence description of the result",
+  "servings": number,
+  "serving_unit": "string, the natural single unit, e.g. 'cookie', 'slice', 'muffin'",
+  "confidence_note": "one short sentence on how this recipe satisfies the stated constraints",
+  "ingredients": [ {"amount": number, "unit": "string like cup, tsp, g, or empty string for whole items", "name": "string"} ],
+  "steps": [ {"text": "string, the instruction — include the specific measurement/amount inline for every ingredient this step uses (e.g. 'Whisk 2 cups flour, 1 tsp salt, and 3 tbsp sugar', not 'Whisk flour, salt, and sugar'), so the step is fully self-contained without needing to check the ingredients list separately", "timer_minutes": number or null (set a number only if this step involves waiting — baking, rising, proofing, chilling, resting, boiling, simmering; null for active hands-on steps)"} ],
+  "nutrition_per_serving": {"calories": number, "protein_g": number, "carbs_g": number, "fat_g": number, "sugar_g": number},
+  "time_estimate": {"prep_minutes": number, "inactive_minutes": number (rising, chilling, resting, proofing — 0 if none), "bake_minutes": number, "total_minutes": number (must exactly equal prep_minutes + inactive_minutes + bake_minutes)},
+  "suggested_additions": [ {"name": "string, short ingredient name", "reason": "one short sentence on what it would add", "emoji": "a single emoji that represents this ingredient"} ]
+}
+Estimate nutrition_per_serving as a reasonable approximation — label it as an estimate.
+${QUALITY_BAR}
+Keep it concise: 6-10 ingredients, 5-8 short steps (one sentence each), description under 25 words, confidence_note under 20 words, 2-3 suggested_additions with reasons under 15 words each.`;
+
+    try{
+      const text = await callClaude([{role:"user", content: prompt}]);
+      const result = extractJSON(text);
+      const suggestions = result.suggested_additions || [];
+      delete result.suggested_additions;
+
+      if(result.title) buildPastTitles.push(result.title);
+
+      buildOutput.innerHTML = `<div class="result-grid">
+        <div class="recipe-slot"></div>
+        <div class="suggestions-panel"></div>
+      </div>`;
+      const recipeSlot = buildOutput.querySelector('.recipe-slot');
+      const suggestionsSlot = buildOutput.querySelector('.suggestions-panel');
+
+      buildController = makeRecipeController(recipeSlot);
+      buildController.setRecipe(result);
+      addToHistory(result, wild ? 'Build (wild)' : 'Build');
+
+      const suggestionsHTML = renderSuggestions(suggestionsSlot, suggestions);
+      if(!suggestionsHTML){
+        suggestionsSlot.style.display = 'none';
+      }else{
+        suggestionsSlot.style.display = 'flex';
+        suggestionsSlot.innerHTML = suggestionsHTML;
+        wireSuggestions(suggestionsSlot, suggestions, ()=>buildController, null);
+      }
+    }catch(err){
+      buildError.textContent = "Couldn't build a recipe from that — try adjusting your constraints. (" + err.message + ")";
+      buildError.style.display = 'block';
+    }finally{
+      buildLoading.style.display = 'none';
+      buildBtn.disabled = false;
+      buildWildBtn.disabled = false;
+    }
+  }
+
+  // ---------- Validate ----------
+  const validateDish = document.getElementById('validateDish');
+  const validateBtn = document.getElementById('validateBtn');
+  const validateLoading = document.getElementById('validateLoading');
+  const validateError = document.getElementById('validateError');
+  const validateOutput = document.getElementById('validateOutput');
+
+  function renderValidation(result, dishFallback){
+    let html = `<div class="confidence" style="margin-top:20px;">Based on patterns common across many published recipes for this dish — reasoned from general baking knowledge, not a live web search.</div>`;
+    html += `<h3 class="recipe-title" style="margin-top:14px;">${escapeHTML(result.dish || dishFallback)}</h3>`;
+    if(result.summary){
+      html += `<p class="recipe-desc">${escapeHTML(result.summary)}</p>`;
+    }
+    html += `<div class="validate-grid">`;
+
+    html += `<div><div class="validate-col-title required">✓ Structural essentials</div>`;
+    (result.structural_requirements || []).forEach(item=>{
+      html += `<div class="validate-card required"><div class="validate-icon">✓</div><div><div class="validate-item-name">${escapeHTML(item.item)}</div><div class="validate-item-reason">${escapeHTML(item.reason || '')}</div></div></div>`;
+    });
+    html += `</div>`;
+
+    html += `<div><div class="validate-col-title flexible">~ Down to preference</div>`;
+    (result.flexible_choices || []).forEach(item=>{
+      html += `<div class="validate-card flexible"><div class="validate-icon">~</div><div><div class="validate-item-name">${escapeHTML(item.item)}</div><div class="validate-item-reason">${escapeHTML(item.reason || '')}</div></div></div>`;
+    });
+    html += `</div>`;
+
+    html += `</div>`;
+    validateOutput.innerHTML = html;
+  }
+
+  validateBtn.addEventListener('click', async ()=>{
+    const dish = validateDish.value.trim();
+    if(!dish){
+      validateError.textContent = "Tell it what dish to check first.";
+      validateError.style.display = 'block';
+      return;
+    }
+
+    validateError.style.display = 'none';
+    validateLoading.style.display = 'flex';
+    validateBtn.disabled = true;
+    validateOutput.innerHTML = '';
+
+    const prompt = `You are a baking expert who has studied many published, well-tested recipes for a specific dish. Based on your general knowledge of how this dish is reliably made across many sources, identify two things:
+
+1. Structural requirements: steps or ingredients that show up consistently across virtually all reliable versions of this dish because skipping or changing them would meaningfully hurt the result (e.g. "chill the dough" for cut-out cookies, "rest the batter" for crepes, "don't overmix" for muffins).
+2. Flexible choices: things that vary widely by recipe or personal preference and don't meaningfully affect whether the dish works (e.g. exact sugar amount, type of chocolate, added spices, mix-ins).
+
+Dish: "${dish}"
+
+Respond with ONLY a JSON object, no preamble, no markdown fences, matching exactly this shape:
+{
+  "dish": "string, cleaned-up dish name",
+  "summary": "one short sentence overview of what makes this dish work",
+  "structural_requirements": [ {"item": "string, short label", "reason": "one short sentence on why skipping this would hurt the result"} ],
+  "flexible_choices": [ {"item": "string, short label", "reason": "one short sentence on how it commonly varies"} ]
+}
+Give 3-6 structural_requirements and 3-6 flexible_choices. Keep reasons under 18 words each. If the input isn't a recognizable baked dish, do your best interpretation and note that in the summary.`;
+
+    try{
+      const text = await callClaude([{role:"user", content: prompt}]);
+      const result = extractJSON(text);
+      renderValidation(result, dish);
+    }catch(err){
+      validateError.textContent = "Couldn't check that dish — try a more specific name. (" + err.message + ")";
+      validateError.style.display = 'block';
+    }finally{
+      validateLoading.style.display = 'none';
+      validateBtn.disabled = false;
+    }
+  });
+})();
+</script>
+</body>
+</html>
